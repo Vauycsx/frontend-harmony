@@ -38,65 +38,6 @@ let playlists = [];
 let currentPlaylistId = null;
 let songToSaveToPlaylist = null;
 
-// Демо-пісні
-const demoQueue = [
-    {
-        id: 'demo1',
-        title: 'Тиха мелодія',
-        artist: 'Harmony Demo',
-        duration: '0:30',
-        url: 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130-30s.mp3',
-        demo: true,
-        color: '#ffcfe1'
-    },
-    {
-        id: 'demo2',
-        title: 'Сонячний день',
-        artist: 'Harmony Demo',
-        duration: '0:30',
-        url: 'https://assets.mixkit.co/music/preview/mixkit-driving-ambition-32-30s.mp3',
-        demo: true,
-        color: '#ffb6d0'
-    },
-    {
-        id: 'demo3',
-        title: 'Вечірній бриз',
-        artist: 'Harmony Demo',
-        duration: '0:30',
-        url: 'https://assets.mixkit.co/music/preview/mixkit-deep-urban-623-30s.mp3',
-        demo: true,
-        color: '#ffa8d9'
-    }
-];
-
-// Демо-учасники кімнати
-const demoMembers = [
-    { id: 1, name: 'Марія', avatar: 'fas fa-heart', color: '#ffcfe1' },
-    { id: 2, name: 'Анна', avatar: 'fas fa-star', color: '#ffb6d0' },
-    { id: 3, name: 'Софія', avatar: 'fas fa-cloud', color: '#ffa8d9' },
-    { id: 4, name: 'Олексій', avatar: 'fas fa-moon', color: '#ff9ac8' }
-];
-
-// Демо-плейлисти
-const demoPlaylists = [
-    {
-        id: 1,
-        name: 'Улюблене',
-        description: 'Мої улюблені пісні',
-        songs: ['demo1', 'demo2'],
-        color: '#ffcfe1',
-        created: Date.now()
-    },
-    {
-        id: 2,
-        name: 'Для релаксу',
-        description: 'Тихі та спокійні мелодії',
-        songs: ['demo3'],
-        color: '#ffb6d0',
-        created: Date.now() - 86400000
-    }
-];
-
 // API налаштування
 window.HarmonyAPI = {
     BASE_URL: window.API_URL || 'https://harmony-backend.onrender.com',
@@ -1678,3 +1619,4 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
