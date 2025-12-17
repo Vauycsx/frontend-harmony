@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сторінку не знайдено | Harmony</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffebf3 0%, #ffe6f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            text-align: center;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(255, 207, 225, 0.3);
+            border: 1px solid #ffcfe1;
+        }
+        
+        .error-icon {
+            font-size: 100px;
+            color: #ffcfe1;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-family: 'Pacifico', cursive;
+            color: #ff7ea6;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #5a3a4a;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ffcfe1, #ffb6d0);
+            color: white;
+            text-decoration: none;
+            border-radius: 18px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 207, 225, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-music"></i>
+        </div>
+        <h1>404 - Сторінку не знайдено</h1>
+        <p>На жаль, ми не змогли знайти сторінку, яку ви шукаєте. Можливо, вона була переміщена або видалена.</p>
+        <a href="./index.html" class="btn">
+            <i class="fas fa-home"></i> Повернутися на головну
+        </a>
+    </div>
+</body>
+</html>

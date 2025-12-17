@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffcfe1">
+    <meta name="description" content="Harmony - ніжний веб-плеєр для спільного прослуховування музики">
+    <title>Harmony | Музичний плеєр 2025</title>
+    
+    <!-- PWA метатеги -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Pacifico&display=swap">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Індикатор завантаження */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffebf3 0%, #ffe6f0 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #ffcfe1;
+            border-top-color: #ffb6d0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #ff7ea6;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        /* Сховати завантаження */
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Кнопка для налаштування API */
+        .api-config-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffcfe1, #ffb6d0);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 207, 225, 0.3);
+            z-index: 999;
+            display: none;
+        }
+        
+        .api-config-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="not-logged-in">
+    <!-- Індикатор завантаження -->
+    <div id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Завантаження Harmony...</div>
+    </div>
+    
+    <!-- Кнопка для налаштування API -->
+    <button class="api-config-btn" id="apiConfigBtn" title="Налаштування API">
+        <i class="fas fa-cog"></i>
+    </button>
+    
+    <!-- Модальне вікно входу -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="login-hero">
+                <i class="fas fa-music pulse"></i>
+                <h2>Ласкаво просимо до Harmony</h2>
+                <p class="login-description">Для використання додатку необхідно ввести секретний код доступу.</p>
+                <p class="login-note">Без коду доступ до музичного плеєра буде обмежений.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="secretCode">Секретний код</label>
+                <input type="password" class="form-input" id="secretCode" placeholder="Введіть ваш секретний код">
+                <div class="hint">Наприклад: HX-0104-3107-15 або admin або demo</div>
+            </div>
+            <button class="form-btn" id="loginBtn">Увійти до Harmony</button>
+            <div class="login-footer">
+                <p><i class="fas fa-lock"></i> Ваш код зберігається тільки на вашому пристрої</p>
+                <p><i class="fas fa-info-circle"></i> Версія 2025</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Основний контент -->
+    <div class="container hidden" id="appContainer">
+        <!-- Хедер -->
+        <header>
+            <div class="logo">
+                <i class="fas fa-music"></i>
+                <h1>Harmony</h1>
+            </div>
+            
+            <div class="user-section">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Основний контент -->
+        <div class="main-content">
+            <!-- Ліва частина - плеєр -->
+            <div class="player-section">
+                <div class="player-header">
+                    <h2>Зараз грає</h2>
+                    <div class="room-indicator">
+                        <i class="fas fa-users"></i>
+                        <span id="roomNameDisplay">Окрема кімната</span>
+                    </div>
+                </div>
+                
+                <div class="player-controls">
+                    <div class="song-info">
+                        <div class="song-title" id="currentSongTitle">Оберіть пісню</div>
+                        <div class="song-artist" id="currentSongArtist">Додайте пісні до черги</div>
+                    </div>
+                    
+                    <div class="album-art-container">
+                        <div class="light-glow"></div>
+                        <div class="album-art" id="albumArt">
+                            <i class="fas fa-music"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-area">
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="timer">
+                            <span id="currentTime">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="control-btn" id="prevBtn">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn" id="shuffleBtn">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button class="control-btn play-pause" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="control-btn" id="repeatBtn">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button class="control-btn" id="nextBtn">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="queue-actions">
+                    <button class="room-btn" id="uploadSongBtn">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Додати пісню
+                    </button>
+                    <button class="room-btn secondary" id="saveToPlaylistBtn">
+                        <i class="fas fa-heart"></i>
+                        Зберегти до плейлиста
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Права частина - черга, кімната та плейлисти -->
+            <div class="sidebar">
+                <!-- Вкладки для перемикання між розділами -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="queue">
+                        <i class="fas fa-list-ol"></i> Черга
+                    </button>
+                    <button class="tab-btn" data-tab="room">
+                        <i class="fas fa-users"></i> Кімната
+                    </button>
+                    <button class="tab-btn" data-tab="playlists">
+                        <i class="fas fa-heart"></i> Плейлисти
+                    </button>
+                    <button class="tab-btn" data-tab="faq">
+                        <i class="fas fa-question-circle"></i> FAQ
+                    </button>
+                </div>
+                
+                <!-- Вміст вкладки Черга -->
+                <div class="tab-content active" id="queueTab">
+                    <div class="queue-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-list-ol"></i> Черга пісень</h3>
+                            <span id="queueCount">0</span>
+                        </div>
+                        <ul class="queue-list" id="queueList">
+                            <li class="queue-empty">Черга порожня. Додайте пісні.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Вміст вкладки Кімната -->
+                <div class="tab-content" id="roomTab">
+                    <div class="room-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-users"></i> Спільне прослуховування</h3>
+                        </div>
+                        <div class="room-controls">
+                            <button class="room-btn" id="createRoomBtn">
+                                <i class="fas fa-plus-circle"></i>
+                                Створити кімнату
+                            </button>
+                            <button class="room-btn secondary" id="joinRoomBtn">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Приєднатися до кімнати
+                            </button>
+                        </div>
+                        <div class="room-members">
+                            <h4>Учасники кімнати</h4>
+                            <div class="members-list" id="membersList">
+                                <!-- Учасники завантажуються динамічно -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Вміст вкладки Плейлисти -->
+                <div class="tab-content" id="playlistsTab">
+                    <div class="playlists-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-heart"></i> Мої плейлисти</h3>
+                            <button class="icon-btn" id="createPlaylistBtn" title="Створити новий плейлист">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="playlists-list" id="playlistsList">
+                            <div class="playlist-empty">
+                                <i class="fas fa-music"></i>
+                                <p>У вас ще немає плейлистів</p>
+                                <button class="room-btn secondary" id="createFirstPlaylistBtn">
+                                    <i class="fas fa-plus"></i> Створити перший плейлист
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="current-playlist" id="currentPlaylistView">
+                            <!-- Тут відображається обраний плейлист -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Вміст вкладки FAQ -->
+                <div class="tab-content" id="faqTab">
+                    <div class="faq-section">
+                        <div class="section-header">
+                            <h3><i class="fas fa-question-circle"></i> Часті питання</h3>
+                        </div>
+                        <div class="faq-list" id="faqList">
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span>Для кого додаток?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    Harmony - це приватний музичний плеєр для особливого кола користувачів. Він розроблений для тих, хто цінує інтимність та персоналізований досвід прослуховування музики.
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span>Чому саме такий ключ і навіщо він?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    Секретний код забезпечує приватність та ексклюзивність додатку. Кожен код унікальний і надає доступ до особистого простору збереження пісень та плейлистів. Це гарантує, що ваша музична колекція залишається конфіденційною.
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span>Що за додаток і що робити?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    Harmony дозволяє створювати особисту колекцію музики, зберігати улюблені треки в плейлистах, ділитися музикою з друзями через спільні кімнати. Ви можете завантажувати власні пісні, організовувати їх та насолоджуватися чистим звуком у ніжному інтерфейсі.
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span>Як працюють плейлисти?</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    Плейлисти дозволяють зберігати улюблені пісні для подальшого прослуховування. Ви можете створювати необмежену кількість плейлистів, перейменовувати їх, додавати та видаляти пісні. Всі плейлисти зберігаються на вашому пристрої та доступні після повторного входу.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Підвал -->
+        <footer>
+            <p>Harmony &copy; 2025 | Ніжний музичний плеєр для вашої душі</p>
+            <p id="apiStatus" style="font-size: 12px; margin-top: 5px; color: var(--text-light);">API статус: не підключено</p>
+        </footer>
+    </div>
+
+    <!-- Модальні вікна -->
+    
+    <!-- Модальне вікно редагування профілю -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Редагування профілю</h3>
+                <button class="close-modal" id="closeProfileModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Ваш нікнейм</label>
+                    <input type="text" class="form-input" id="nickname" placeholder="Введіть ваш нікнейм" value="Користувач">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Виберіть аватар</label>
+                    <div class="avatar-options" id="avatarOptions">
+                        <!-- Аватари завантажуються динамічно -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="form-btn logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Вийти з акаунту
+                    </button>
+                </div>
+                
+                <button class="form-btn" id="saveProfileBtn">Зберегти зміни</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно завантаження пісні -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Додати пісню</h3>
+                <button class="close-modal" id="closeUploadModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-upload" id="fileUploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Перетягніть аудіофайл сюди або натисніть для вибору</p>
+                    <p class="file-formats">Підтримувані формати: MP3, WAV, OGG, M4A, FLAC</p>
+                    <input type="file" id="audioFileInput" accept="audio/*" style="display: none;">
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Назва пісні (необов'язково)</label>
+                    <input type="text" class="form-input" id="songTitleInput" placeholder="Введіть назву пісні">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Виконавець (необов'язково)</label>
+                    <input type="text" class="form-input" id="songArtistInput" placeholder="Введіть ім'я виконавця">
+                </div>
+                <button class="form-btn" id="confirmUploadBtn">Додати до черги</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно створення кімнати -->
+    <div class="modal" id="createRoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Створити кімнату</h3>
+                <button class="close-modal" id="closeCreateRoomModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Назва кімнати</label>
+                    <input type="text" class="form-input" id="roomName" placeholder="Введіть назву для вашої кімнати">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Код доступу (необов'язково)</label>
+                    <input type="text" class="form-input" id="roomCode" placeholder="Введіть код доступу або залишіть пустим">
+                </div>
+                <button class="form-btn" id="confirmCreateRoomBtn">Створити кімнату</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно приєднання до кімнати -->
+    <div class="modal" id="joinRoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Приєднатися до кімнати</h3>
+                <button class="close-modal" id="closeJoinRoomModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Код кімнати</label>
+                    <input type="text" class="form-input" id="joinRoomCode" placeholder="Введіть код кімнати">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Код доступу (якщо є)</label>
+                    <input type="text" class="form-input" id="joinRoomPassword" placeholder="Введіть код доступу">
+                </div>
+                <button class="form-btn" id="confirmJoinRoomBtn">Приєднатися</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно створення плейлиста -->
+    <div class="modal" id="createPlaylistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Створити плейлист</h3>
+                <button class="close-modal" id="closeCreatePlaylistModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Назва плейлиста</label>
+                    <input type="text" class="form-input" id="playlistName" placeholder="Введіть назву плейлиста" maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Опис (необов'язково)</label>
+                    <textarea class="form-input" id="playlistDescription" placeholder="Додайте опис плейлиста" rows="3"></textarea>
+                </div>
+                <button class="form-btn" id="confirmCreatePlaylistBtn">Створити плейлист</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно збереження до плейлиста -->
+    <div class="modal" id="saveToPlaylistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Зберегти до плейлиста</h3>
+                <button class="close-modal" id="closeSaveToPlaylistModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Оберіть плейлист для збереження</label>
+                    <div class="playlists-select" id="playlistsSelect">
+                        <!-- Список плейлистів завантажується динамічно -->
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <button class="room-btn secondary" id="createNewPlaylistFromSaveBtn">
+                        <i class="fas fa-plus"></i> Створити новий плейлист
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальне вікно налаштування API -->
+    <div class="modal" id="apiConfigModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Налаштування API</h3>
+                <button class="close-modal" id="closeApiConfigModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">URL бекенду API</label>
+                    <input type="text" class="form-input" id="apiUrlInput" placeholder="https://your-backend-url.onrender.com">
+                    <div class="hint">Введіть URL вашого бекенду з Render.com</div>
+                </div>
+                <div class="form-group">
+                    <button class="form-btn" id="testApiBtn">Тестувати з'єднання</button>
+                </div>
+                <div class="form-group">
+                    <button class="form-btn secondary" id="saveApiConfigBtn">Зберегти налаштування</button>
+                </div>
+                <div id="apiTestResult" style="margin-top: 15px; padding: 10px; border-radius: 8px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Повідомлення -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Повідомлення</span>
+    </div>
+
+    <!-- Приховані елементи -->
+    <div class="hidden" id="hiddenElements">
+        <!-- Шаблон плейлиста -->
+        <div class="playlist-item-template">
+            <div class="playlist-item">
+                <div class="playlist-item-cover">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="playlist-item-info">
+                    <div class="playlist-item-title"></div>
+                    <div class="playlist-item-description"></div>
+                    <div class="playlist-item-count">0 пісень</div>
+                </div>
+                <div class="playlist-item-actions">
+                    <button class="icon-btn playlist-play-btn" title="Відтворити">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="icon-btn playlist-edit-btn" title="Редагувати">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="icon-btn playlist-delete-btn" title="Видалити">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Шаблон пісні в плейлисті -->
+        <div class="playlist-song-template">
+            <div class="playlist-song-item">
+                <div class="playlist-song-info">
+                    <div class="playlist-song-title"></div>
+                    <div class="playlist-song-artist"></div>
+                </div>
+                <div class="playlist-song-actions">
+                    <button class="icon-btn playlist-song-play-btn" title="Відтворити">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="icon-btn playlist-song-remove-btn" title="Видалити з плейлиста">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Підключаємо скрипти -->
+    <script>
+        // Глобальна змінна для API URL
+        window.API_URL = localStorage.getItem('harmony_api_url') || 'https://harmony-backend.onrender.com';
+    </script>
+    
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        // Сховати завантаження після повного завантаження
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 1000);
+        });
+        
+        // Реєстрація Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('✅ Service Worker зареєстровано'))
+                .catch(err => console.log('❌ Помилка Service Worker:', err));
+        }
+        
+        // Показати кнопку налаштування API в режимі розробника
+        if (window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1')) {
+            document.getElementById('apiConfigBtn').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
