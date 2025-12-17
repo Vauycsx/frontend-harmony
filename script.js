@@ -40,7 +40,7 @@ let songToSaveToPlaylist = null;
 
 // API налаштування
 window.HarmonyAPI = {
-    BASE_URL: window.API_URL || 'https://harmony-backend.onrender.com',
+    BASE_URL: window.API_URL || 'https://harmony-backend-4f00.onrender.com',
     token: localStorage.getItem('harmony_token') || null,
     
     async login(secretCode) {
@@ -1619,4 +1619,5 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
 
