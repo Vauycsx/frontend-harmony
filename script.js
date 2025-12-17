@@ -1,3 +1,14 @@
+
+let secretCodeInput;
+
+document.addEventListener('DOMContentLoaded', function() {
+    secretCodeInput = document.getElementById('secretCodeInput');
+    // переконайтеся, що елемент знайдено
+    if (!secretCodeInput) {
+        console.error('Елемент secretCodeInput не знайдено в DOM!');
+    }
+});
+
 // Harmony Web Player - Фіксована версія 2025
 console.log('🎵 Harmony Player завантажується...');
 
@@ -1665,4 +1676,5 @@ style.textContent = `
     
     .pulse { animation: pulse 2s infinite; }
 `;
+
 document.head.appendChild(style);
