@@ -136,4 +136,5 @@ class HarmonyAPIService {
 }
 
 // Створюємо глобальний екземпляр
-window.harmonyAPI = new HarmonyAPIService('');
+
+window.harmonyAPI = new HarmonyAPIService('https://harmony-backend-4f00.onrender.com');
