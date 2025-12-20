@@ -1,140 +1,203 @@
-// Harmony API Service - 2025
-class HarmonyAPIService {
+class HarmonyAPI {
     constructor(baseURL) {
-        this.baseURL = baseURL;
-        this.token = localStorage.getItem('harmony_token');
+        this.baseURL = baseURL || window.API_URL;
+        this.user = null;
+        this.token = null;
     }
-    
-    setToken(token) {
-        this.token = token;
-        if (token) {
-            localStorage.setItem('harmony_token', token);
-        } else {
-            localStorage.removeItem('harmony_token');
-        }
-    }
-    
-    async request(endpoint, options = {}) {
-        const url = `${this.baseURL}${endpoint}`;
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
-        
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-        
+
+    // Авторизація
+    async login(secretCode) {
         try {
-            const response = await fetch(url, {
-                ...options,
-                headers
+            const response = await fetch(`${this.baseURL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ secretCode })
             });
-            
+
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error('Помилка авторизації');
             }
-            
-            return await response.json();
+
+            const data = await response.json();
+            this.user = data.user;
+            localStorage.setItem('harmony_user', JSON.stringify(data.user));
+            return data;
         } catch (error) {
-            console.error(`API Error (${endpoint}):`, error);
             throw error;
         }
     }
-    
-    // Користувачі
-    async login(secretCode) {
-        return this.request('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({ secretCode })
-        });
+
+    // Оновлення профілю
+    async updateProfile(userId, data) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка оновлення профілю');
+            }
+
+            const result = await response.json();
+            this.user = result.user;
+            localStorage.setItem('harmony_user', JSON.stringify(result.user));
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async getProfile() {
-        return this.request('/api/profile');
+
+    // Завантаження пісні
+    async uploadSong(userId, file, metadata = {}) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', file);
+            formData.append('userId', userId);
+            formData.append('title', metadata.title || '');
+            formData.append('artist', metadata.artist || '');
+
+            const response = await fetch(`${this.baseURL}/api/songs/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка завантаження пісні');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async updateProfile(data) {
-        return this.request('/api/profile', {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+
+    // Отримання пісень користувача
+    async getUserSongs(userId) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/songs/user/${userId}`);
+            if (!response.ok) {
+                throw new Error('Помилка отримання пісень');
+            }
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    // Пісні
-    async uploadSong(songData) {
-        return this.request('/api/songs', {
-            method: 'POST',
-            body: JSON.stringify(songData)
-        });
+
+    // Створення плейлиста
+    async createPlaylist(userId, name, description = '') {
+        try {
+            const response = await fetch(`${this.baseURL}/api/playlists`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId, name, description })
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка створення плейлиста');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async getSongs() {
-        return this.request('/api/songs');
+
+    // Отримання плейлистів користувача
+    async getUserPlaylists(userId) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/playlists/user/${userId}`);
+            if (!response.ok) {
+                throw new Error('Помилка отримання плейлистів');
+            }
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async deleteSong(id) {
-        return this.request(`/api/songs/${id}`, {
-            method: 'DELETE'
-        });
+
+    // Додавання пісні до плейлиста
+    async addSongToPlaylist(playlistId, songId) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/playlists/${playlistId}/songs`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ songId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка додавання пісні до плейлиста');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    // Плейлисти
-    async createPlaylist(data) {
-        return this.request('/api/playlists', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+
+    // Створення кімнати
+    async createRoom(hostId, name, password = '') {
+        try {
+            const response = await fetch(`${this.baseURL}/api/rooms`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ hostId, name, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Помилка створення кімнати');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async getPlaylists() {
-        return this.request('/api/playlists');
+
+    // Приєднання до кімнати
+    async joinRoom(code, password = '', userId) {
+        try {
+            const response = await fetch(`${this.baseURL}/api/rooms/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code, password, userId })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Помилка приєднання до кімнати');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
-    
-    async updatePlaylist(id, data) {
-        return this.request(`/api/playlists/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-    }
-    
-    async deletePlaylist(id) {
-        return this.request(`/api/playlists/${id}`, {
-            method: 'DELETE'
-        });
-    }
-    
-    // Кімнати
-    async createRoom(data) {
-        return this.request('/api/rooms', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-    }
-    
-    async joinRoom(data) {
-        return this.request('/api/rooms/join', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-    }
-    
-    // Демо дані
-    async getDemoSongs() {
-        return this.request('/api/demo-songs');
-    }
-    
-    // Health check
-    async healthCheck() {
+
+    // Перевірка статусу API
+    async checkAPIStatus() {
         try {
             const response = await fetch(`${this.baseURL}/health`);
             return response.ok;
-        } catch {
+        } catch (error) {
             return false;
         }
     }
 }
 
-// Створюємо глобальний екземпляр
-
-window.harmonyAPI = new HarmonyAPIService('https://harmony-backend-4f00.onrender.com');
+// Експорт для використання в інших файлах
+window.HarmonyAPI = HarmonyAPI;
