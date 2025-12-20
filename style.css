@@ -1617,73 +1617,237 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
     header {
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px;
+        padding: 15px;
+        margin-bottom: 20px;
     }
-    
+
     .logo h1 {
-        font-size: 30px;
+        font-size: 24px;
     }
-    
+
+    .user-section {
+        gap: 15px;
+    }
+
+    .user-avatar, .theme-toggle {
+        width: 45px;
+        height: 45px;
+    }
+
+    .player-section {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .player-header h2 {
+        font-size: 22px;
+    }
+
     .album-art-container {
-        width: 250px;
-        height: 250px;
+        width: 200px;
+        height: 200px;
     }
-    
+
     .album-art {
-        width: 230px;
-        height: 230px;
+        width: 180px;
+        height: 180px;
     }
-    
+
     .light-glow {
-        width: 270px;
-        height: 270px;
+        width: 220px;
+        height: 220px;
     }
-    
+
     .song-title {
-        font-size: 24px;
+        font-size: 20px;
     }
-    
+
     .song-artist {
-        font-size: 18px;
+        font-size: 16px;
     }
-    
+
     .controls {
-        gap: 20px;
+        gap: 10px;
     }
-    
+
     .control-btn {
-        width: 55px;
-        height: 55px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .play-pause {
+        width: 60px;
+        height: 60px;
         font-size: 24px;
     }
-    
-    .play-pause {
-        width: 65px;
-        height: 65px;
-        font-size: 28px;
-    }
-    
+
     .queue-actions {
         flex-direction: column;
+        gap: 10px;
     }
-    
+
     .queue-actions .room-btn {
         max-width: none;
     }
-    
-    .modal-content {
-        padding: 30px 25px;
-    }
-    
+
     .tabs {
         flex-wrap: wrap;
     }
-    
+
     .tab-btn {
+        flex: 1 1 45%;
+        font-size: 14px;
+        padding: 10px 5px;
+    }
+
+    .queue-section, .room-section, .playlists-section, .faq-section {
+        padding: 20px;
+    }
+
+    .section-header h3 {
+        font-size: 18px;
+    }
+
+    .queue-item {
+        padding: 12px 15px;
+    }
+
+    .queue-item-title {
+        font-size: 14px;
+    }
+
+    .queue-item-artist {
+        font-size: 12px;
+    }
+
+    .room-btn {
         font-size: 15px;
-        padding: 12px 8px;
+        padding: 15px;
+    }
+
+    .playlist-item {
+        padding: 15px;
+    }
+
+    .playlist-item-cover {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+    }
+
+    .playlist-item-title {
+        font-size: 16px;
+    }
+
+    .playlist-item-description {
+        font-size: 13px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .modal-title {
+        font-size: 22px;
+    }
+
+    .form-input {
+        padding: 15px;
+    }
+
+    .form-btn {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .album-art-container {
+        width: 180px;
+        height: 180px;
+    }
+
+    .album-art {
+        width: 160px;
+        height: 160px;
+    }
+
+    .light-glow {
+        width: 200px;
+        height: 200px;
+    }
+
+    .tab-btn {
+        flex: 1 1 100%;
+    }
+
+    .queue-item-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .queue-action-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .playlist-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .playlist-item-cover {
+        margin-bottom: 10px;
+    }
+
+    .playlist-item-info {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .playlist-item-actions {
+        align-self: flex-end;
+    }
+}
+@media (max-width: 768px) {
+    header {
+        flex-direction: row; /* Замість column, щоб лого і кнопки були в одному рядку */
+        justify-content: space-between;
+    }
+
+    .logo {
+        gap: 10px;
+    }
+
+    .logo i {
+        font-size: 28px;
+    }
+
+    .user-section {
+        gap: 10px;
+    }
+}
+@media (max-width: 768px) {
+    #loginModal .modal-content {
+        padding: 20px;
+    }
+
+    .login-hero h2 {
+        font-size: 28px;
+    }
+
+    .login-hero i {
+        font-size: 50px;
     }
 }
